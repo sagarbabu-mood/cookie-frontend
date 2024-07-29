@@ -54,16 +54,21 @@ class Home extends Component {
   getHomeVideos = async () => {
     this.setState({apiStatus: apiStatusConstants.inProgress})
     const jwtToken = Cookies.get('jwt_token')
+    const sessionId = Cookies.get('session_id') // Get session_id from cookies
+
     const {searchInput} = this.state
 
-    const apiUrl = `https://sagar-nxtwatch-backend.onrender.com/all?search=${searchInput}`
+    // const apiUrl = `https://cookie-backend-oymq.onrender.com/all?search=${searchInput}`;
+    const apiUrl = `http://localhost:3019/all?search=${searchInput}`
     const options = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        Authorization: `Bearer ${jwtToken}`,
+        'session-id': sessionId,
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZ2FyIiwiaWF0IjoxNzIyMjcxNDkwfQ.rckv8JYpcmlJf9Nhg8EA5_icCFhyKfgAcKA7MhJdRtE`,
       },
+      credentials: 'include', // Ensure cookies are included in the request
     }
 
     const response = await fetch(apiUrl, options)
@@ -154,39 +159,38 @@ class Home extends Component {
     </NxtWatchContext.Consumer>
   )
 
-  displaySuccessView = () => {
+  displayHomeVideosView = () => {
     const {homeVideos} = this.state
-
-    if (homeVideos.length > 1) {
-      return (
-        <HomeVideosContainer>
-          {homeVideos.map(eachVideo => (
-            <VideoItem key={eachVideo.id} videoDetails={eachVideo} />
-          ))}
-        </HomeVideosContainer>
-      )
-    }
-    return this.displayNoSearchResultsView()
+    const lengthOfVideos = homeVideos.length
+    const shouldShowVideosView = lengthOfVideos > 0
+    return shouldShowVideosView ? (
+      <HomeVideosContainer>
+        {homeVideos.map(eachVideo => (
+          <VideoItem key={eachVideo.id} videoDetails={eachVideo} />
+        ))}
+      </HomeVideosContainer>
+    ) : (
+      this.displayNoSearchResultsView()
+    )
   }
 
-  renderHomeVideos = () => {
+  renderApiStatus = () => {
     const {apiStatus} = this.state
+
     switch (apiStatus) {
-      case apiStatusConstants.inProgress:
-        return <LoadingView />
+      case apiStatusConstants.success:
+        return this.displayHomeVideosView()
       case apiStatusConstants.failure:
         return <FailureView onClickRetry={this.onClickRetry} />
-      case apiStatusConstants.success:
-        return this.displaySuccessView()
+      case apiStatusConstants.inProgress:
+        return <LoadingView />
       default:
         return null
     }
   }
 
-  onEnterSearchInput = event => {
-    if (event.key === 'Enter') {
-      this.getHomeVideos()
-    }
+  onClickSearchIcon = () => {
+    this.getHomeVideos()
   }
 
   render() {
@@ -195,7 +199,6 @@ class Home extends Component {
       <NxtWatchContext.Consumer>
         {value => {
           const {isDarkTheme} = value
-
           return (
             <HomeContainer isDarkTheme={isDarkTheme}>
               <Header />
@@ -203,29 +206,23 @@ class Home extends Component {
                 <Sidebar />
                 <BannerAndHomeContainer>
                   {this.displayBanner()}
-                  <SearchAndHomeContainer
-                    data-testid="home"
-                    isDarkTheme={isDarkTheme}
-                  >
+                  <SearchAndHomeContainer>
                     <SearchContainer>
                       <SearchInput
-                        onKeyDown={this.onEnterSearchInput}
-                        onChange={this.onUpdateSearchInput}
-                        placeholder="Search"
-                        type="search"
                         value={searchInput}
-                        isDarkTheme={isDarkTheme}
+                        onChange={this.onUpdateSearchInput}
+                        type="search"
+                        placeholder="Search"
                       />
                       <SearchButton
-                        type="button"
-                        onClick={this.onClickRetry}
-                        isDarkTheme={isDarkTheme}
+                        onClick={this.onClickSearchIcon}
                         data-testid="searchButton"
+                        type="button"
                       >
-                        <AiOutlineSearch color="#616e7c" size={20} />
+                        <AiOutlineSearch size={20} />
                       </SearchButton>
                     </SearchContainer>
-                    {this.renderHomeVideos()}
+                    {this.renderApiStatus()}
                   </SearchAndHomeContainer>
                 </BannerAndHomeContainer>
               </SidebarAndHomeContainer>

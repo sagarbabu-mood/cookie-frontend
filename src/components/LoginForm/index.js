@@ -1,8 +1,6 @@
 import {Component} from 'react'
-
 import Cookies from 'js-cookie'
 import {Redirect} from 'react-router-dom'
-
 import NxtWatchContext from '../../context/NxtWatchContext'
 import {
   LoginMainContainer,
@@ -34,11 +32,18 @@ class LoginForm extends Component {
     this.setState({password: event.target.value})
   }
 
-  onSubmitSuccess = jwtToken => {
+  onSubmitSuccess = (jwtToken, sessionId) => {
     const {history} = this.props
 
     Cookies.set('jwt_token', jwtToken, {
       expires: 30,
+      sameSite: 'Strict',
+      secure: true,
+    })
+    Cookies.set('session_id', sessionId, {
+      expires: 30,
+      sameSite: 'Strict',
+      secure: true,
     })
     history.replace('/')
   }
@@ -51,7 +56,7 @@ class LoginForm extends Component {
     event.preventDefault()
     const {username, password} = this.state
     const userDetails = {username, password}
-    const url = 'https://sagar-nxtwatch-backend.onrender.com/login'
+    const url = 'https://cookie-backend-oymq.onrender.com/login'
     const options = {
       method: 'POST',
       headers: {
@@ -64,10 +69,10 @@ class LoginForm extends Component {
 
     if (response.ok === true) {
       const data = await response.json()
-      this.onSubmitSuccess(data.jwt_token)
+      console.log(data)
+      this.onSubmitSuccess(data.jwt_token, data.session_id)
     } else {
       const data = await response.text()
-      console.log(data)
       this.onSubmitFailure(data)
     }
   }
@@ -82,11 +87,11 @@ class LoginForm extends Component {
     const {isPasswordVisible, username, password, errorMsg} = this.state
     const passwordOrText = isPasswordVisible ? 'text' : 'password'
 
-    const jwtToken = Cookies.get('jwt_token')
+    // const jwtToken = Cookies.get('jwt_token');
 
-    if (jwtToken !== undefined) {
-      return <Redirect to="/" />
-    }
+    // if (jwtToken !== undefined) {
+    //   return <Redirect to="/" />;
+    // }
 
     return (
       <NxtWatchContext.Consumer>
