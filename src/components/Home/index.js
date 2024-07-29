@@ -58,8 +58,8 @@ class Home extends Component {
 
     const {searchInput} = this.state
 
-    // const apiUrl = `https://cookie-backend-oymq.onrender.com/all?search=${searchInput}`;
-    const apiUrl = `http://localhost:3019/all?search=${searchInput}`
+    const apiUrl = `https://cookie-backend-oymq.onrender.com/all?search=${searchInput}`
+    // const apiUrl = `http://localhost:3019/all?search=${searchInput}`
     const options = {
       method: 'GET',
       headers: {
