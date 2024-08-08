@@ -34,16 +34,12 @@ class LoginForm extends Component {
 
   onSubmitSuccess = (jwtToken, sessionId) => {
     const {history} = this.props
-
-    Cookies.set('jwt_token', jwtToken, {
-      expires: 30,
-      sameSite: 'Strict',
-      secure: true,
-    })
+    console.log(jwtToken, sessionId, 'frontend ')
+    Cookies.set('jwt_tokensss', jwtToken)
     Cookies.set('session_id', sessionId, {
-      expires: 30,
-      sameSite: 'Strict',
-      secure: true,
+      domain: '.onrender.com',
+      sameSite: 'None', // Ensure this matches the backend
+      secure: false, // Set to true when using HTTPS
     })
     history.replace('/')
   }
@@ -60,6 +56,7 @@ class LoginForm extends Component {
     // const url = 'http://localhost:3019/login'
     const options = {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
