@@ -39,7 +39,7 @@ class LoginForm extends Component {
     Cookies.set('session_id', sessionId, {
       domain: '.onrender.com',
       sameSite: 'None', // Ensure this matches the backend
-      secure: false, // Set to true when using HTTPS
+      secure: true, // Set to true when using HTTPS
     })
     history.replace('/')
   }
